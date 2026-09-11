@@ -1,0 +1,26 @@
+name: CI Database
+
+on:
+  pull_request:
+    branches: [ "develop", "main", "epic/**" ]
+
+jobs:
+  Validar-Schema-do-Banco:
+    name: Validar Schema do Banco
+    runs-on: ubuntu-latest
+    steps:
+      - name: 1. Baixar o codigo fonte
+        uses: actions/checkout@v4
+
+      - name: 2. Configurar o Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 3. Instalar Dependencias
+        run: npm ci
+
+      - name: 4. Validar Formatacao Estetica (Prisma Format)
+        run: |
+          npx prisma format
+          git diff --exit-code prisma/
