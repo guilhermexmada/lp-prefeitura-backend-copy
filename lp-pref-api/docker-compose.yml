@@ -1,0 +1,30 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: lp_database_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: lp-database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      # roda automaticamente na PRIMEIRA vez que o container sobe (banco vazio)
+      - ./seed.sql:/docker-entrypoint-initdb.d/seed.sql
+      - lp_database_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: lp_database_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
+
+volumes:
+  lp_database_data:

@@ -1,0 +1,8 @@
+# dependências
+node_modules
+# build do typescript
+dist/
+# variáveis de ambiente
+.env
+# prisma
+src/generated

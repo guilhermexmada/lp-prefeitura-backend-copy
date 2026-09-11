@@ -1,0 +1,265 @@
+generator client {
+  provider        = "prisma-client"
+  output          = "../src/generated/prisma"
+  previewFeatures = ["postgresqlExtensions", "partialIndexes"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  extensions = [postgis]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model arquivos {
+  id                      Int                    @id
+  id_ticket               Int?
+  id_solicitacao_mensagem Int?
+  path                    String                 @db.VarChar
+  tipo                    String?                @db.VarChar
+  created_at              DateTime               @default(now()) @db.Timestamp(6)
+  solicitacao_mensagens   solicitacao_mensagens? @relation(fields: [id_solicitacao_mensagem], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tickets                 tickets?               @relation(fields: [id_ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model categorias {
+  id                              Int           @id
+  id_departamento                 Int
+  nome                            String        @db.VarChar
+  tempo_primeira_resposta_minutos Int
+  tempo_maximo_resolucao_minutos  Int
+  tempo_minimo_resolucao_minutos  Int
+  tempo_resolucao_urgente_minutos Int
+  ativo                           Boolean       @default(true)
+  departamentos                   departamentos @relation(fields: [id_departamento], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  perguntas                       perguntas[]
+  tickets                         tickets[]
+}
+
+model departamentos {
+  id                    Int                     @id
+  id_secretaria         Int
+  nome                  String                  @db.VarChar
+  sigla                 String?                 @db.VarChar
+  ativo                 Boolean                 @default(true)
+  categorias            categorias[]
+  secretarias           secretarias             @relation(fields: [id_secretaria], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  perguntas             perguntas[]
+  solicitacoes          solicitacoes[]
+  tickets               tickets[]
+  usuario_departamentos usuario_departamentos[]
+}
+
+model logs_auditoria {
+  id            Int       @id
+  id_usuario    Int?
+  acao          String    @db.VarChar
+  entidade_tipo String    @db.VarChar
+  entidade_id   Int
+  dados_antigos Json?
+  dados_novos   Json?
+  created_at    DateTime  @default(now()) @db.Timestamp(6)
+  usuarios      usuarios? @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model notificacoes {
+  id             Int                     @id
+  id_usuario     Int
+  tipo_evento    notificacao_tipo_enum
+  id_ticket      Int?
+  id_solicitacao Int?
+  canal          notificacao_canal_enum  @default(push)
+  status         notificacao_status_enum @default(pendente)
+  tentativas     Int                     @default(0)
+  created_at     DateTime                @default(now()) @db.Timestamp(6)
+  enviado_em     DateTime?               @db.Timestamp(6)
+  lido_em        DateTime?               @db.Timestamp(6)
+  solicitacoes   solicitacoes?           @relation(fields: [id_solicitacao], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tickets        tickets?                @relation(fields: [id_ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios       usuarios                @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model perguntas {
+  id                         Int            @id
+  id_categoria               Int
+  enunciado                  String
+  reducao_minutos            Int            @default(0)
+  critica                    Boolean        @default(false)
+  id_departamento_solicitado Int?
+  ordem                      Int            @default(0)
+  categorias                 categorias     @relation(fields: [id_categoria], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  departamentos              departamentos? @relation(fields: [id_departamento_solicitado], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  respostas                  respostas[]
+}
+
+model respostas {
+  id          Int       @id
+  id_pergunta Int
+  id_ticket   Int
+  valor       Boolean
+  perguntas   perguntas @relation(fields: [id_pergunta], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tickets     tickets   @relation(fields: [id_ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model secretarias {
+  id            Int             @id
+  nome          String          @db.VarChar
+  sigla         String?         @db.VarChar
+  ativo         Boolean         @default(true)
+  departamentos departamentos[]
+}
+
+model solicitacao_mensagens {
+  id             Int          @id
+  id_solicitacao Int
+  id_usuario     Int
+  mensagem       String
+  created_at     DateTime     @default(now()) @db.Timestamp(6)
+  arquivos       arquivos[]
+  solicitacoes   solicitacoes @relation(fields: [id_solicitacao], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios       usuarios     @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model solicitacoes {
+  id                         Int                     @id
+  id_ticket                  Int
+  id_departamento_solicitado Int
+  status                     solicitacao_status_enum @default(pendente)
+  descricao                  String
+  resposta                   String?
+  respondido_por             Int?
+  created_at                 DateTime                @default(now()) @db.Timestamp(6)
+  respondido_em              DateTime?               @db.Timestamp(6)
+  notificacoes               notificacoes[]
+  solicitacao_mensagens      solicitacao_mensagens[]
+  departamentos              departamentos           @relation(fields: [id_departamento_solicitado], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  tickets                    tickets                 @relation(fields: [id_ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios                   usuarios?               @relation(fields: [respondido_por], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model spatial_ref_sys {
+  srid      Int     @id
+  auth_name String? @db.VarChar(256)
+  auth_srid Int?
+  srtext    String? @db.VarChar(2048)
+  proj4text String? @db.VarChar(2048)
+}
+
+model ticket_historico {
+  id            Int                 @id
+  id_ticket     Int
+  tipo_evento   tipo_evento_enum
+  status        ticket_status_enum?
+  prazo_minutos Int?
+  id_usuario    Int?
+  texto         String?
+  created_at    DateTime            @default(now()) @db.Timestamp(6)
+  tickets       tickets             @relation(fields: [id_ticket], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios      usuarios?           @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model tickets {
+  id                                                    Int                       @id
+  id_usuario                                            Int
+  id_categoria                                          Int
+  id_departamento                                       Int
+  id_funcionario_responsavel                            Int?
+  status                                                ticket_status_enum        @default(aberto)
+  prioridade                                            ticket_prioridade_enum    @default(normal)
+  descricao                                             String?
+  geom                                                  Unsupported("geography")?
+  token_acesso                                          String?                   @unique @db.VarChar
+  prazo_primeira_resposta_minutos                       Int
+  prazo_resolucao_minutos                               Int
+  created_at                                            DateTime                  @default(now()) @db.Timestamp(6)
+  arquivos                                              arquivos[]
+  notificacoes                                          notificacoes[]
+  respostas                                             respostas[]
+  solicitacoes                                          solicitacoes[]
+  ticket_historico                                      ticket_historico[]
+  categorias                                            categorias                @relation(fields: [id_categoria], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  departamentos                                         departamentos             @relation(fields: [id_departamento], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios_tickets_id_funcionario_responsavelTousuarios usuarios?                 @relation("tickets_id_funcionario_responsavelTousuarios", fields: [id_funcionario_responsavel], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios_tickets_id_usuarioTousuarios                 usuarios                  @relation("tickets_id_usuarioTousuarios", fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model usuario_departamentos {
+  id              Int           @id
+  id_usuario      Int
+  id_departamento Int
+  departamentos   departamentos @relation(fields: [id_departamento], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  usuarios        usuarios      @relation(fields: [id_usuario], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([id_usuario, id_departamento])
+}
+
+model usuarios {
+  id                                                   Int                     @id @default(autoincrement())
+  tipo_usuario                                         tipo_usuario_enum       @default(municipe)
+  nome                                                 String?                 @db.VarChar
+  email                                                String?                 @db.VarChar
+  senha_hash                                           String?                 @db.VarChar
+  reservado                                            Boolean                 @unique(map: "uq_usuarios_unico_reservado", where: raw("(reservado = true)")) @default(false)
+  ativo                                                Boolean                 @default(true)
+  created_at                                           DateTime                @default(now()) @db.Timestamp(6)
+  logs_auditoria                                       logs_auditoria[]
+  notificacoes                                         notificacoes[]
+  solicitacao_mensagens                                solicitacao_mensagens[]
+  solicitacoes                                         solicitacoes[]
+  ticket_historico                                     ticket_historico[]
+  tickets_tickets_id_funcionario_responsavelTousuarios tickets[]               @relation("tickets_id_funcionario_responsavelTousuarios")
+  tickets_tickets_id_usuarioTousuarios                 tickets[]               @relation("tickets_id_usuarioTousuarios")
+  usuario_departamentos                                usuario_departamentos[]
+}
+
+enum notificacao_canal_enum {
+  push
+  email
+}
+
+enum notificacao_status_enum {
+  pendente
+  enviada
+  falhou
+  lida
+}
+
+enum notificacao_tipo_enum {
+  novo_ticket
+  nova_solicitacao
+  solicitacao_respondida
+}
+
+enum solicitacao_status_enum {
+  pendente
+  em_analise
+  respondida
+  recusada
+}
+
+enum ticket_prioridade_enum {
+  normal
+  urgente
+}
+
+enum ticket_status_enum {
+  aberto
+  em_analise
+  em_andamento
+  pendente
+  resolvido
+  fechado
+}
+
+enum tipo_evento_enum {
+  criacao
+  mudanca_status
+  ajuste_prazo
+  atribuicao
+}
+
+enum tipo_usuario_enum {
+  municipe
+  funcionario
+}
