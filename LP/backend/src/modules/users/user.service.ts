@@ -1,15 +1,10 @@
 import { prisma } from "../../shared/database/prisma.js";
 import { AppError } from "../../shared/errors/app-error.js";
+import { CreateUserDTO, LoginUserDTO } from './dtos/user.dto.js';
 import { comparePassword, hashPassword } from "../../shared/utils/hash.js";
 
-interface CreateUserInput {
-  nome?: string;
-  email: string;
-  senha: string;
-}
-
 class UserService {
-  async create(data: CreateUserInput) {
+  async create(data: CreateUserDTO) {
     const existente = await prisma.user.findFirst({
       where: {
         email: data.email,
@@ -22,7 +17,7 @@ class UserService {
 
     const passwordHash = await hashPassword(data.senha);
 
-    return prisma.user.create({
+    const usuario = await prisma.user.create({
       data: {
         name: data.nome,
         email: data.email,
@@ -36,23 +31,23 @@ class UserService {
         createdAt: true,
       },
     });
+
+    return usuario;
   }
 
-  async login(email: string, senha: string) {
+  async login(data: LoginUserDTO) {
     const usuario = await prisma.user.findFirst({
       where: {
-        email,
+        email: data.email,
+        ativo: true, // apenas usuários ativos logam
       },
     });
 
-    if (!usuario || !usuario.passwordHash || !usuario.ativo) {
+    if (!usuario || !usuario.passwordHash) {
       throw new AppError("E-mail ou senha inválidos", 401);
     }
 
-    const senhaValida = await comparePassword(
-      senha,
-      usuario.passwordHash,
-    );
+    const senhaValida = await comparePassword(data.senha, usuario.passwordHash);
 
     if (!senhaValida) {
       throw new AppError("E-mail ou senha inválidos", 401);

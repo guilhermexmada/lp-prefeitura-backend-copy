@@ -2,33 +2,17 @@ import type { Request, Response } from "express";
 import { z } from "zod";
 import { generateToken } from "../../shared/utils/jwt.js";
 import { userService } from "./user.service.js";
-
-// validações com ZOD
-const registerSchema = z.object({
-  nome: z.string().min(1).optional(),
-  email: z.string().email(),
-  senha: z.string().min(6),
-});
-
-const loginSchema = z.object({
-  email: z.string().email(),
-  senha: z.string().min(1),
-});
+import { CreateUserDTO, LoginUserDTO } from "./dtos/user.dto.js";
 
 export class UserController {
   register = async (request: Request, response: Response) => {
-    const { nome, email, senha } = registerSchema.parse(request.body);
+    const data: CreateUserDTO = request.body;
 
-    const usuario = await userService.create({
-      nome,
-      email,
-      senha,
-    });
+    const usuario = await userService.create(data);
 
-    const token = generateToken({
-      id: usuario.id,
-      tipo_usuario: usuario.tipoUsuario,
-    });
+    const { id, email, tipoUsuario } = usuario;
+
+    const token = generateToken({ id, email, tipoUsuario });
 
     response.status(201).json({
       usuario: {
@@ -43,14 +27,13 @@ export class UserController {
   };
 
   login = async (request: Request, response: Response) => {
-    const { email, senha } = loginSchema.parse(request.body);
+    const data: LoginUserDTO = request.body;
 
-    const usuario = await userService.login(email, senha);
+    const usuario = await userService.login(data);
 
-    const token = generateToken({
-      id: usuario.id,
-      tipo_usuario: usuario.tipoUsuario,
-    });
+    const { id, email, tipoUsuario } = usuario;
+
+    const token = generateToken({ id, email, tipoUsuario });
 
     response.status(200).json({
       usuario: {
@@ -62,9 +45,5 @@ export class UserController {
       },
       token,
     });
-  };
-
-  me = async (request: Request, response: Response) => {
-    response.status(200).json(request.user);
   };
 }
