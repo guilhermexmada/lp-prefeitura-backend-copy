@@ -68,3 +68,5 @@ http://localhost:3000/api/user/login
 - Alterar schema.prisma do repositório database: adicionar auto_increment() em todos os IDs
 - Igualar versão das dependências do Prisma entre database e backend
 - Refatorar rotas de register e login adicionando comentários mínimos
+- Padronizar nome da model de usuários (está User enquanto as outras estão em português)
+- Corrigir conflito de .env entre database e backend que impede de abrir o prisma studio
