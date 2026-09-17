@@ -5,7 +5,7 @@ import { CreateUserDTO, LoginUserDTO } from "./dtos/user.dto.js";
 
 export class UserController {
   register = async (request: Request, response: Response) => {
-    const data: CreateUserDTO = request.body;
+    const data = request.validated?.body as CreateUserDTO;
 
     const usuario = await userService.create(data);
 
@@ -26,7 +26,7 @@ export class UserController {
   };
 
   login = async (request: Request, response: Response) => {
-    const data: LoginUserDTO = request.body;
+    const data = request.validated?.body as LoginUserDTO;
 
     const usuario = await userService.login(data);
 
