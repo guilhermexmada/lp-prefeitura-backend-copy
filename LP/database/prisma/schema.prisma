@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  //Altera conforme está sua estrutura de pastas local
   output   = "../../backend/node_modules/.prisma/client"
 }
 
@@ -76,7 +77,7 @@ enum NotificacaoStatus {
 }
 
 model Secretaria {
-  id            Int            @id
+  id            Int            @id @default(autoincrement())
   nome          String         @db.VarChar
   sigla         String?        @db.VarChar
   ativo         Boolean        @default(true)
@@ -86,7 +87,7 @@ model Secretaria {
 }
 
 model Departamento {
-  id                   Int                   @id
+  id                   Int                   @id @default(autoincrement())
   idSecretaria         Int                   @map("id_secretaria")
   nome                 String                @db.VarChar
   sigla                String?               @db.VarChar
@@ -124,7 +125,7 @@ model User {
 }
 
 model UsuarioDepartamento {
-  id             Int          @id
+  id             Int          @id @default(autoincrement())
   idUsuario      Int          @map("id_usuario")
   idDepartamento Int          @map("id_departamento")
   usuario        User         @relation(fields: [idUsuario], references: [id])
@@ -136,7 +137,7 @@ model UsuarioDepartamento {
 }
 
 model Categoria {
-  id                           Int          @id
+  id                           Int          @id @default(autoincrement())
   idDepartamento               Int          @map("id_departamento")
   nome                         String       @db.VarChar
   tempoPrimeiraRespostaMinutos Int          @map("tempo_primeira_resposta_minutos")
@@ -153,7 +154,7 @@ model Categoria {
 }
 
 model Pergunta {
-  id                       Int           @id
+  id                       Int           @id @default(autoincrement())
   idCategoria              Int           @map("id_categoria")
   enunciado                String        @db.Text
   reducaoMinutos           Int           @default(0) @map("reducao_minutos")
@@ -170,7 +171,7 @@ model Pergunta {
 }
 
 model Ticket {
-  id                           Int                                   @id
+  id                           Int                                   @id @default(autoincrement())
   idUsuario                    Int                                   @map("id_usuario")
   idCategoria                  Int                                   @map("id_categoria")
   idDepartamento               Int                                   @map("id_departamento")
@@ -201,7 +202,7 @@ model Ticket {
 }
 
 model Resposta {
-  id         Int      @id
+  id         Int      @id @default(autoincrement())
   idPergunta Int      @map("id_pergunta")
   idTicket   Int      @map("id_ticket")
   valor      Boolean
@@ -214,7 +215,7 @@ model Resposta {
 }
 
 model TicketHistorico {
-  id           Int           @id
+  id           Int           @id @default(autoincrement())
   idTicket     Int           @map("id_ticket")
   tipoEvento   TipoEvento    @map("tipo_evento")
   status       TicketStatus?
@@ -231,7 +232,7 @@ model TicketHistorico {
 }
 
 model Solicitacao {
-  id                       Int                   @id
+  id                       Int                   @id @default(autoincrement())
   idTicket                 Int                   @map("id_ticket")
   idDepartamentoSolicitado Int                   @map("id_departamento_solicitado")
   status                   SolicitacaoStatus     @default(pendente)
@@ -253,7 +254,7 @@ model Solicitacao {
 }
 
 model SolicitacaoMensagem {
-  id            Int         @id
+  id            Int         @id @default(autoincrement())
   idSolicitacao Int         @map("id_solicitacao")
   idUsuario     Int         @map("id_usuario")
   mensagem      String      @db.Text
@@ -268,7 +269,7 @@ model SolicitacaoMensagem {
 }
 
 model Arquivo {
-  id                    Int                  @id
+  id                    Int                  @id @default(autoincrement())
   idTicket              Int?                 @map("id_ticket")
   idSolicitacaoMensagem Int?                 @map("id_solicitacao_mensagem")
   path                  String               @db.VarChar
@@ -283,7 +284,7 @@ model Arquivo {
 }
 
 model Notificacao {
-  id            Int               @id
+  id            Int               @id @default(autoincrement())
   idUsuario     Int               @map("id_usuario")
   tipoEvento    NotificacaoTipo   @map("tipo_evento")
   idTicket      Int?              @map("id_ticket")
@@ -305,7 +306,7 @@ model Notificacao {
 }
 
 model LogAuditoria {
-  id           Int      @id
+  id           Int      @id @default(autoincrement())
   idUsuario    Int?     @map("id_usuario")
   acao         String   @db.VarChar
   entidadeTipo String   @map("entidade_tipo") @db.VarChar

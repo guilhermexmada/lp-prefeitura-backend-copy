@@ -1,7 +1,7 @@
 import { prisma } from "../../shared/database/prisma.js";
 import { AppError } from "../../shared/errors/app-error.js";
 import { CreateUserDTO, LoginUserDTO } from './dtos/user.dto.js';
-import { comparePassword, hashPassword } from "../../shared/utils/hash.js";
+import { hashPassword, comparePassword } from "../../shared/utils/hash.js";
 
 class UserService {
   async create(data: CreateUserDTO) {

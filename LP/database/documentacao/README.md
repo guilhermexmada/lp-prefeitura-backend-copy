@@ -1,5 +1,7 @@
 # Manual do Desenvolvedor: Configuração e Fluxo de Trabalho
 
+> Consulte também [Migrations e seed por ambiente](migrations-e-seed.md) para aplicar a estrutura em produção e carregar dados fictícios somente no desenvolvimento local.
+
 ## 1. Fluxo de Trabalho do Desenvolvedor (Passo a Passo)
 
 **Cenário de Exemplo:** O PO criou a Issue `#12`, gerou a branch `feat/12-botao-entrar` no repositório remoto e atribuiu a tarefa a você.

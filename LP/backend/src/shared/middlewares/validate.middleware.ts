@@ -7,7 +7,7 @@ import { z } from "zod";
 */
 
 export function validateBody(schema: z.ZodType) {
-    return (req: Request, res: Response, next: NextFunction) => {
+    return (req: Request, _res: Response, next: NextFunction) => {
         try {
             req.body = schema.parse(req.body);
             next();

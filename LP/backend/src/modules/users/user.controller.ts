@@ -1,5 +1,4 @@
 import type { Request, Response } from "express";
-import { z } from "zod";
 import { generateToken } from "../../shared/utils/jwt.js";
 import { userService } from "./user.service.js";
 import { CreateUserDTO, LoginUserDTO } from "./dtos/user.dto.js";
@@ -10,9 +9,9 @@ export class UserController {
 
     const usuario = await userService.create(data);
 
-    const { id, email, tipoUsuario } = usuario;
+    const { id, email, name, tipoUsuario } = usuario;
 
-    const token = generateToken({ id, email, tipoUsuario });
+    const token = generateToken({ id, email, name, tipoUsuario });
 
     response.status(201).json({
       usuario: {
@@ -31,9 +30,9 @@ export class UserController {
 
     const usuario = await userService.login(data);
 
-    const { id, email, tipoUsuario } = usuario;
+    const { id, email, name, tipoUsuario } = usuario;
 
-    const token = generateToken({ id, email, tipoUsuario });
+    const token = generateToken({ id, email, name, tipoUsuario });
 
     response.status(200).json({
       usuario: {
@@ -45,5 +44,9 @@ export class UserController {
       },
       token,
     });
+  };
+
+  me = async (request: Request, response: Response) => {
+    response.status(200).json(request.user);
   };
 }

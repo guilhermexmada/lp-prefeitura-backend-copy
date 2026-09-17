@@ -1,14 +1,6 @@
 import type { NextFunction, Request, Response } from "express";
 import { AppError } from "../errors/app-error.js";
-import { verifyToken, type TokenPayload } from "../utils/jwt.js";
-
-declare global {
-  namespace Express {
-    interface Request {
-      user?: TokenPayload;
-    }
-  }
-}
+import { verifyToken } from "../utils/jwt.js";
 
 export function authMiddleware(request: Request, _response: Response, next: NextFunction) {
   const authHeader = request.headers.authorization;
