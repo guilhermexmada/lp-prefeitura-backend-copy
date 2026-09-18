@@ -10,8 +10,10 @@ datasource db {
 }
 
 enum TipoUsuario {
+  anonimo
   municipe
   funcionario
+  gestor
 
   @@map("tipo_usuario_enum")
 }
