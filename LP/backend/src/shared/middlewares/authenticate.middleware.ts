@@ -11,8 +11,7 @@ export function authMiddleware(request: Request, _response: Response, next: Next
     id: 1,
     email: null,
     name: null,
-    tipoUsuario: "municipe",
-    anonymous: true
+    tipoUsuario: "anonimo",
   };
 
   // Nenhum header enviado -> é anônimo, pois nunca iniciou sessão

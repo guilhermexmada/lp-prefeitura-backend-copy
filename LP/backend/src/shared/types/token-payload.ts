@@ -5,5 +5,4 @@ export interface TokenPayload {
   email: string | null // alguns campos permitem null para usuários anônimos
   name: string | null 
   tipoUsuario: TipoUsuario,
-  anonymous: boolean
 }

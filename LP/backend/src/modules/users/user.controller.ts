@@ -11,7 +11,7 @@ export class UserController {
 
     const { id, email, name, tipoUsuario } = usuario;
 
-    const token = generateToken({ id, email, name, tipoUsuario, anonymous: false });
+    const token = generateToken({ id, email, name, tipoUsuario});
 
     response.status(201).json({
       usuario: {
@@ -32,7 +32,7 @@ export class UserController {
 
     const { id, email, name, tipoUsuario } = usuario;
 
-    const token = generateToken({ id, email, name, tipoUsuario, anonymous: false });
+    const token = generateToken({ id, email, name, tipoUsuario});
 
     response.status(200).json({
       usuario: {
