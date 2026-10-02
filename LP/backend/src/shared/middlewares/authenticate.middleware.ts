@@ -1,17 +1,21 @@
-import type { NextFunction, Request, Response } from "express";
-import { AppError, UnauthorizedError } from "../errors/index.js";
-import { TokenPayload } from "../types/token-payload.js";
-import { verifyToken } from "../utils/jwt.js";
+import type { NextFunction, Request, Response } from 'express';
+import { AppError } from '../errors/app-error.js';
+import { verifyToken } from '../utils/jwt.js';
+import { TokenPayload } from '../types/token-payload.js';
 
-export function authMiddleware(request: Request, _response: Response, next: NextFunction) {
+export function authMiddleware(
+  request: Request,
+  _response: Response,
+  next: NextFunction,
+) {
   const authHeader = request.headers.authorization;
 
-  // dados do usuário anônimo
+  // dados de usuário anônimo
   const ANONYMOUS_USER: TokenPayload = {
     id: 1,
     email: null,
     name: null,
-    tipoUsuario: "anonimo",
+    tipoUsuario: 'anonimo',
   };
 
   // Nenhum header enviado -> é anônimo, pois nunca iniciou sessão
@@ -20,15 +24,15 @@ export function authMiddleware(request: Request, _response: Response, next: Next
     return next();
   }
 
-  if (!authHeader.startsWith("Bearer ")) {
-    throw new UnauthorizedError('Formato de token inválido')
+  if (!authHeader.startsWith('Bearer ')) {
+    throw new AppError('Token inválido', 401);
   }
 
   try {
-    request.user = verifyToken(authHeader.split(" ")[1]);
+    request.user = verifyToken(authHeader.split(' ')[1]);
     return next();
   } catch {
     // header existe, mas token expirou/invalidou -> sessão quebrada, não anônima
-    throw new UnauthorizedError('Sessão expirada, faça login novamente')
+    throw new AppError('Sessão expirada, faça login novamente', 401);
   }
 }

@@ -1,5 +1,7 @@
 -- Dados exclusivamente para desenvolvimento local.
 -- Este script apaga os dados atuais das tabelas do sistema antes de recarregar o cenário de exemplo.
+-- Atualizado para incluir um exemplo do novo tipo de usuário 'gestor', introduzido pela migration:
+--   ALTER TYPE "tipo_usuario_enum" ADD VALUE 'gestor';
 TRUNCATE TABLE secretarias CASCADE;
 
 -- ==========================================================
@@ -34,6 +36,10 @@ INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash) VALUES
   (6, 'funcionario', 'Roberto Alves Souza',   'roberto.souza@registro.sp.gov.br', 'hash_exemplo_6'),
   (7, 'funcionario', 'Juliana Pereira Nunes', 'juliana.nunes@registro.sp.gov.br', 'hash_exemplo_7');
 
+-- gestor (novo tipo de usuário: supervisiona os departamentos da secretaria)
+INSERT INTO usuarios (id, tipo_usuario, nome, email, senha_hash) VALUES
+  (8, 'gestor', 'Patrícia Menezes Duarte', 'patricia.duarte@registro.sp.gov.br', 'hash_exemplo_8');
+
 -- vínculo funcionário x departamento (Roberto atua em 2 departamentos)
 INSERT INTO usuario_departamentos (id, id_usuario, id_departamento) VALUES
   (1, 4, 1), -- Carlos    -> Vias
@@ -41,6 +47,12 @@ INSERT INTO usuario_departamentos (id, id_usuario, id_departamento) VALUES
   (3, 6, 1), -- Roberto   -> Vias
   (4, 6, 3), -- Roberto   -> Drenagem (mesmo funcionário, 2 departamentos)
   (5, 7, 3); -- Juliana   -> Drenagem
+
+-- vínculo da gestora com os departamentos que supervisiona na secretaria
+INSERT INTO usuario_departamentos (id, id_usuario, id_departamento) VALUES
+  (6, 8, 1), -- Patrícia (gestora) -> Vias
+  (7, 8, 2), -- Patrícia (gestora) -> Poda
+  (8, 8, 3); -- Patrícia (gestora) -> Drenagem
 
 -- ---------- CATEGORIAS ----------
 
@@ -262,6 +274,11 @@ INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao
 INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao, canal, status, created_at) VALUES
   (6, 4, 'nova_solicitacao', 4, 2, 'push', 'pendente', '2026-08-25 06:46:00');
 
+-- solicitacao_respondida: a gestora também acompanha, com visibilidade sobre toda a secretaria,
+-- a mesma solicitação já notificada a Carlos e Roberto (ids 4 e 5)
+INSERT INTO notificacoes (id, id_usuario, tipo_evento, id_ticket, id_solicitacao, canal, status, created_at, enviado_em) VALUES
+  (7, 8, 'solicitacao_respondida', 3, 1, 'push', 'lida', '2026-08-19 11:30:00', '2026-08-19 11:30:03');
+
 -- ---------- LOGS DE AUDITORIA (exemplos) ----------
 
 INSERT INTO logs_auditoria (id, id_usuario, acao, entidade_tipo, entidade_id, dados_antigos, dados_novos, created_at) VALUES
@@ -273,6 +290,14 @@ INSERT INTO logs_auditoria (id, id_usuario, acao, entidade_tipo, entidade_id, da
      '{"tipo_usuario": "municipe"}'::jsonb,
      '{"tipo_usuario": "funcionario"}'::jsonb,
      '2026-07-15 09:00:00');
+
+-- ação administrativa realizada por um usuário do tipo 'gestor': ajuste do
+-- SLA de primeira resposta da categoria "Poda de árvore"
+INSERT INTO logs_auditoria (id, id_usuario, acao, entidade_tipo, entidade_id, dados_antigos, dados_novos, created_at) VALUES
+  (3, 8, 'categoria_alterada', 'categorias', 2,
+     '{"tempo_primeira_resposta_minutos": 2880}'::jsonb,
+     '{"tempo_primeira_resposta_minutos": 1440}'::jsonb,
+     '2026-08-24 09:00:00');
 
 -- Os INSERTs acima usam IDs explícitos; sincroniza as sequences para a próxima inserção da aplicação.
 DO $$

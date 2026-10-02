@@ -1,22 +1,20 @@
-// shared/middlewares/authorize.middleware.ts
 import { Request, Response, NextFunction } from 'express';
 import { TokenPayload } from '../types/token-payload.js';
-import { TipoUsuario } from '@prisma/client';
-import { UnauthorizedError } from '../errors/unauthorized-error.js';
-import { ForbiddenError } from '../errors/forbidden-error.js';
+import { PapelUsuario } from '../types/token-payload.js';
+import { AppError } from '../errors/app-error.js';
 
-export function authorizeMiddleware(...allowedTypes: TipoUsuario[]) {
-    return (req: Request, res: Response, next: NextFunction) => {
-        const user = req.user as TokenPayload;
+export function authorizeMiddleware(...allowedTypes: PapelUsuario[]) {
+  return (req: Request, _res: Response, next: NextFunction) => {
+    const user = req.user as TokenPayload;
 
-        if (!user) {
-            throw new UnauthorizedError('Usuário não autenticado');
-        }
+    if (!user) {
+      throw new AppError('Usuário não autenticado', 401);
+    }
 
-        if (!allowedTypes.includes(user.tipoUsuario)) {
-            throw new ForbiddenError(`Acesso restrito a: ${allowedTypes.join(', ')}`);
-        }
+    if (!allowedTypes.includes(user.tipoUsuario)) {
+      throw new AppError('Acesso restrito', 403);
+    }
 
-        return next();
-    };
+    return next();
+  };
 }
