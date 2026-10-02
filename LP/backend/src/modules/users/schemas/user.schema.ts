@@ -11,8 +11,6 @@ export const createUserSchema = z.object({
   email: z.string().email('Informe um email válido'),
 
   senha: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
-
-  tipoUsuario: z.enum(['municipe', 'funcionario', 'gestor']).optional(),
 });
 
 export const loginUserSchema = z.object({
@@ -55,4 +53,22 @@ export const getManyFuncionariosQuerySchema = z.object({
   // parâmetros de paginação
   page: z.coerce.number().int().positive().default(1),
   limit: z.coerce.number().int().positive().max(25).default(20),
+})
+
+export const createFuncionarioBodySchema = z.object({
+  nome: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
+
+  email: z.string().email('Informe um email válido'),
+
+  senha: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
+
+  tipoUsuario: z.enum(['municipe', 'funcionario', 'gestor']).optional(),
+
+  departamentoIds: z.array(z.coerce.number().int().positive()),
+
+  status: z.boolean()
+
+  // cargo:
+
+  // fotoPerfil:
 })

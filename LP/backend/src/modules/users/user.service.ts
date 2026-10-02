@@ -7,8 +7,10 @@ import type {
   SetDepartamentosBodyDTO,
   UpdateUserBodyDTO,
   GetManyFuncionariosQueryDTO,
+  CreateFuncionarioBodyDTO,
 } from './dtos/user.dto.js';
 import { hashPassword, comparePassword } from '../../shared/utils/hash.js';
+import { getActiveDepartamentoIds } from '../../shared/authorization/department-scope.service.js';
 
 // atributos retornados em update, softDelete
 const userSummarySelect = {
@@ -47,14 +49,14 @@ const funcionarioSummarySelect = {
 } satisfies Prisma.UserSelect;
 
 // tipa retorno puro em getManyFuncionarios
-type funcionarioSelectOriginal = Prisma.UserGetPayload<{select: typeof funcionarioSummarySelect}>
+type funcionarioSelectOriginal = Prisma.UserGetPayload<{ select: typeof funcionarioSummarySelect }>
 
 // mapeia retorno formatado em getManyFuncionarios
-function toGetManyFuncionariosResponse(funcionario: funcionarioSelectOriginal){
-  const {usuarioDepartamentos, _count, ...dados} = funcionario;
+function toGetManyFuncionariosResponse(funcionario: funcionarioSelectOriginal) {
+  const { usuarioDepartamentos, _count, ...dados } = funcionario;
   return {
     ...dados,
-    departamentos: usuarioDepartamentos.map(({departamento}) => departamento),
+    departamentos: usuarioDepartamentos.map(({ departamento }) => departamento),
     totalTickets: _count.ticketsResponsaveis
   }
 }
@@ -82,7 +84,6 @@ class UserService {
         data: {
           name: data.nome,
           passwordHash,
-          tipoUsuario: data.tipoUsuario ?? 'municipe',
           ativo: true,
         },
         select: {
@@ -100,7 +101,7 @@ class UserService {
         name: data.nome,
         email: data.email,
         passwordHash,
-        tipoUsuario: data.tipoUsuario ?? 'municipe',
+        // tipoUsuario: data.tipoUsuario ?? 'municipe',
       },
       select: {
         id: true,
@@ -187,6 +188,7 @@ class UserService {
     });
   }
 
+  // atualiza departamentos do funcionário
   async setDepartamentos(id: number, data: SetDepartamentosBodyDTO) {
     await this.findUserOrThrow(id);
 
@@ -224,7 +226,7 @@ class UserService {
     });
   }
 
-  // consulta de funcionários - busca por nome, ou retorna todos
+  // consulta funcionários por nome, ou retorna todos
   async getManyFuncionarios(query: GetManyFuncionariosQueryDTO) {
 
     // busca APENAS funcionários
@@ -259,6 +261,81 @@ class UserService {
     }
   }
 
+  async createFuncionario(data: CreateFuncionarioBodyDTO) {
+    const existente = await prisma.user.findFirst({
+      where: {
+        email: data.email,
+      },
+    });
+
+    const passwordHash = await hashPassword(data.senha);
+    const departamentoIds = [...new Set(data.departamentoIds)];
+    const ativos = await getActiveDepartamentoIds(departamentoIds);
+    const invalidos = departamentoIds.filter((id) => !ativos.includes(id));
+    const vinculos = departamentoIds.map((idDepartamento) => ({ idDepartamento }));
+
+
+    if (invalidos.length > 0) {
+      throw new AppError(
+        `Departamentos inválidos ou inativos: ${invalidos.join(', ')}`,
+        400,
+      );
+    }
+
+    if (existente) {
+      if (existente.ativo) {
+        throw new AppError('Já existe um cadastro com esse e-mail', 409);
+      }
+
+      // Usuário tinha passado por soft delete: reativa o mesmo registro em
+      // vez de criar um novo, preservando o histórico já vinculado a ele
+      // (tickets, TicketHistorico, UsuarioDepartamento etc.).
+      return prisma.user.update({
+        where: { id: existente.id },
+        data: {
+          name: data.nome,
+          passwordHash,
+          tipoUsuario: data.tipoUsuario ?? 'municipe',
+          ativo: data.status,
+          usuarioDepartamentos: {
+            deleteMany: {},
+            createMany: { data: vinculos },
+          }
+        },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          tipoUsuario: true,
+          createdAt: true,
+        },
+      });
+    }
+
+    const funcionario = await prisma.user.create({
+      data: {
+        name: data.nome,
+        email: data.email,
+        passwordHash,
+        tipoUsuario: data.tipoUsuario ?? 'municipe',
+        ativo: data.status,
+        usuarioDepartamentos: {
+          createMany: { data: vinculos },
+        },
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        tipoUsuario: true,
+        createdAt: true,
+      },
+    });
+
+    return funcionario;
+  }
+
+  // helper de busca obrigatória por ID
   private async findUserOrThrow(id: number) {
     const usuario = await prisma.user.findUnique({ where: { id } });
 
@@ -271,34 +348,3 @@ class UserService {
 }
 
 export const userService = new UserService();
-
-/*
-const { page, limit, nome } = filters;
-    const skip = (page - 1) * limit;
-
-    const where: Record<string, any> = {};
-
-    if (nome) {
-      where.nome = nome;
-    }
-
-    const [funcionarios, total] = await Promise.all([
-      prisma.user.findMany({
-        where,
-        skip,
-        take: limit,
-        orderBy: { createdAt: 'desc' },
-      }),
-      prisma.user.count({ where }),
-    ]);
-
-    return {
-      data: funcionarios,
-      meta: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
-*/

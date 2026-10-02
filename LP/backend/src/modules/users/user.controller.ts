@@ -2,6 +2,7 @@ import type { Request, Response } from 'express';
 import { generateToken } from '../../shared/utils/jwt.js';
 import { userService } from './user.service.js';
 import type {
+  CreateFuncionarioBodyDTO,
   CreateUserDTO,
   GetManyFuncionariosQueryDTO,
   LoginUserDTO,
@@ -89,5 +90,11 @@ export class UserController {
     const result = await userService.getManyFuncionarios(query);
 
     response.status(200).json(result);
+  }
+
+  createFuncionario = async (request: Request, response: Response) => {
+    const body = request.validated?.body as CreateFuncionarioBodyDTO;
+
+    
   }
 }

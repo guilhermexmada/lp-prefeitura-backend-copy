@@ -8,6 +8,7 @@ import {
 import { authMiddleware } from '../../shared/middlewares/authenticate.middleware.js';
 import { authorizeMiddleware } from '../../shared/middlewares/authorize.middleware.js';
 import {
+  createFuncionarioBodySchema,
   createUserSchema,
   getManyFuncionariosQuerySchema,
   loginUserSchema,
@@ -43,11 +44,19 @@ usersRoutes.get('/me', authMiddleware, asyncHandler(usersController.me));
 
 /*
   ROTAS GESTOR
-  - edição
-  - deleção lógica
+  - cadastro de funcionários
+  - edição geral *
+  - deleção lógica geral *
   - atualização de departamento
-  - consulta de operadores + busca
+  - consulta de funcionários + busca
 */
+usersRoutes.post(
+  '/funcionario',
+  authorizeMiddleware('gestor'),
+  validateBody(createFuncionarioBodySchema),
+  asyncHandler(usersController.createFuncionario)
+)
+
 usersRoutes.patch(
   '/:id',
   authorizeMiddleware('gestor'),

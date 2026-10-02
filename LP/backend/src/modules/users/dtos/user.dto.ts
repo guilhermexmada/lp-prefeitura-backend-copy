@@ -5,7 +5,8 @@ import type {
   setDepartamentosBodySchema,
   updateUserBodySchema,
   userIdParamsSchema,
-  getManyFuncionariosQuerySchema
+  getManyFuncionariosQuerySchema,
+  createFuncionarioBodySchema,
 } from '../schemas/user.schema.js';
 
 /*
@@ -26,3 +27,5 @@ export type SetDepartamentosBodyDTO = z.infer<
 >;
 
 export type GetManyFuncionariosQueryDTO = z.infer<typeof getManyFuncionariosQuerySchema>;
+
+export type CreateFuncionarioBodyDTO = z.infer<typeof createFuncionarioBodySchema>;

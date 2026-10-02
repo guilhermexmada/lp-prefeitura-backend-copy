@@ -15,10 +15,11 @@ import {
   ticketIdParamsSchema,
   updateTicketBodySchema,
 } from './schemas/ticket.schema.js';
+import { authorizeMiddleware } from '../../shared/middlewares/authorize.middleware.js';
 
 const ticketRoutes = Router();
 
-ticketRoutes.use(authMiddleware, requireFuncionario);
+ticketRoutes.use(authMiddleware, authorizeMiddleware('gestor'));
 
 ticketRoutes.get(
   '/',
