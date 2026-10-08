@@ -95,6 +95,8 @@ export class UserController {
   createFuncionario = async (request: Request, response: Response) => {
     const body = request.validated?.body as CreateFuncionarioBodyDTO;
 
-    
+    const result = await userService.createFuncionario(body);
+
+    response.status(202).json(result);
   }
 }

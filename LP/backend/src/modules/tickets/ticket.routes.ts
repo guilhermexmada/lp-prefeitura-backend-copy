@@ -19,7 +19,7 @@ import { authorizeMiddleware } from '../../shared/middlewares/authorize.middlewa
 
 const ticketRoutes = Router();
 
-ticketRoutes.use(authMiddleware, authorizeMiddleware('gestor'));
+ticketRoutes.use(authMiddleware, authorizeMiddleware('funcionario', 'gestor'));
 
 ticketRoutes.get(
   '/',

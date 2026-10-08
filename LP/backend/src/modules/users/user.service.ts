@@ -261,6 +261,7 @@ class UserService {
     }
   }
 
+  // cadastra funcionários/gestores vinculando-os aos departamentos
   async createFuncionario(data: CreateFuncionarioBodyDTO) {
     const existente = await prisma.user.findFirst({
       where: {
@@ -295,7 +296,7 @@ class UserService {
         data: {
           name: data.nome,
           passwordHash,
-          tipoUsuario: data.tipoUsuario ?? 'municipe',
+          tipoUsuario: data.tipoUsuario ?? 'funcionario',
           ativo: data.status,
           usuarioDepartamentos: {
             deleteMany: {},
@@ -317,7 +318,7 @@ class UserService {
         name: data.nome,
         email: data.email,
         passwordHash,
-        tipoUsuario: data.tipoUsuario ?? 'municipe',
+        tipoUsuario: data.tipoUsuario ?? 'funcionario',
         ativo: data.status,
         usuarioDepartamentos: {
           createMany: { data: vinculos },
