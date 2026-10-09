@@ -31,8 +31,10 @@ class RelatorioService {
             this.taxaResolucao(periodo.anterior)
         ]);
 
+        // tempos de ticket
         const [tempoAtual, tempoAnterior] = await Promise.all([
-
+            this.temposTicket(periodo),
+            this.temposTicket(periodo.anterior)
         ])
 
         return {
@@ -40,6 +42,8 @@ class RelatorioService {
             ticketsTotaisPeriodoAnterior: totalAnterior,
             taxaResolucaoAtual: resolucaoAtual,
             taxaResolucaoAnterior: resolucaoAnterior,
+            temposTicketAtual: tempoAtual,
+            temposTicketAnterior: tempoAnterior
         }
     }
 
