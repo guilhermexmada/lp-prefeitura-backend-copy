@@ -8,13 +8,13 @@ import { z } from 'zod';
 export const createUserSchema = z.object({
   nome: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
 
-  email: z.string().email('Informe um email válido'),
+  email: z.string().trim().toLowerCase().email('Informe um email válido'),
 
   senha: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
 });
 
 export const loginUserSchema = z.object({
-  email: z.string().email('Informe um email válido'),
+  email: z.string().trim().toLowerCase().email('Informe um email válido'),
 
   senha: z.string().min(1, 'A senha é obrigatória'),
 });
@@ -29,7 +29,7 @@ export const updateUserBodySchema = z
       .string()
       .min(3, 'O nome deve ter pelo menos 3 caracteres')
       .optional(),
-    email: z.string().email('Informe um email válido').optional(),
+    email: z.string().trim().toLowerCase().email('Informe um email válido').optional(),
     senha: z
       .string()
       .min(8, 'A senha deve ter pelo menos 8 caracteres')
@@ -58,7 +58,7 @@ export const getManyFuncionariosQuerySchema = z.object({
 export const createFuncionarioBodySchema = z.object({
   nome: z.string().min(3, 'O nome deve ter pelo menos 3 caracteres'),
 
-  email: z.string().email('Informe um email válido'),
+  email: z.string().trim().toLowerCase().email('Informe um email válido'),
 
   senha: z.string().min(8, 'A senha deve ter pelo menos 8 caracteres'),
 

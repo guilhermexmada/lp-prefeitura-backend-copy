@@ -13,7 +13,7 @@ import type {
 
 export class UserController {
   register = async (request: Request, response: Response) => {
-    const data = request.body as CreateUserDTO;
+    const data = request.validated?.body as CreateUserDTO;
 
     const usuario = await userService.create(data);
 
@@ -34,7 +34,7 @@ export class UserController {
   };
 
   login = async (request: Request, response: Response) => {
-    const data = request.body as LoginUserDTO;
+    const data = request.validated?.body as LoginUserDTO;
 
     const usuario = await userService.login(data);
 
@@ -60,7 +60,7 @@ export class UserController {
 
   update = async (request: Request, response: Response) => {
     const { id } = request.validated?.params as UserIdParamsDTO;
-    const data = request.body as UpdateUserBodyDTO;
+    const data = request.validated?.body as UpdateUserBodyDTO;
 
     const usuario = await userService.update(id, data);
 
@@ -97,6 +97,6 @@ export class UserController {
 
     const result = await userService.createFuncionario(body);
 
-    response.status(202).json(result);
+    response.status(201).json(result);
   }
 }

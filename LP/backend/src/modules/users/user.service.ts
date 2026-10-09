@@ -49,10 +49,10 @@ const funcionarioSummarySelect = {
 } satisfies Prisma.UserSelect;
 
 // tipa retorno puro em getManyFuncionarios
-type funcionarioSelectOriginal = Prisma.UserGetPayload<{ select: typeof funcionarioSummarySelect }>
+type FuncionarioSelectOriginal = Prisma.UserGetPayload<{ select: typeof funcionarioSummarySelect }>
 
 // mapeia retorno formatado em getManyFuncionarios
-function toGetManyFuncionariosResponse(funcionario: funcionarioSelectOriginal) {
+function toGetManyFuncionariosResponse(funcionario: FuncionarioSelectOriginal) {
   const { usuarioDepartamentos, _count, ...dados } = funcionario;
   return {
     ...dados,
@@ -268,7 +268,6 @@ class UserService {
         email: data.email,
       },
     });
-
     const passwordHash = await hashPassword(data.senha);
     const departamentoIds = [...new Set(data.departamentoIds)];
     const ativos = await getActiveDepartamentoIds(departamentoIds);

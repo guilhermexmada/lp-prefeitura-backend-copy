@@ -21,14 +21,7 @@ import { UserController } from './user.controller.js';
 const usersRoutes = Router();
 const usersController = new UserController();
 
-usersRoutes.use(authMiddleware)
-
-/* 
-  ROTAS LIVRES
-  - cadastro
-  - login
-  - auto consulta
-*/
+// rotas públicas
 usersRoutes.post(
   '/register',
   validateBody(createUserSchema),
@@ -40,26 +33,20 @@ usersRoutes.post(
   asyncHandler(usersController.login),
 );
 
-usersRoutes.get('/me', authMiddleware, asyncHandler(usersController.me));
+// autenticadas
+usersRoutes.use(authMiddleware);
+usersRoutes.get('/me', asyncHandler(usersController.me));
 
-/*
-  ROTAS GESTOR
-  - cadastro de funcionários
-  - edição geral *
-  - deleção lógica geral *
-  - atualização de departamento
-  - consulta de funcionários + busca
-*/
+// gestor
+usersRoutes.use(authorizeMiddleware('gestor'));
 usersRoutes.post(
   '/funcionario',
-  authorizeMiddleware('gestor'),
   validateBody(createFuncionarioBodySchema),
   asyncHandler(usersController.createFuncionario)
 )
 
 usersRoutes.patch(
   '/:id',
-  authorizeMiddleware('gestor'),
   validateParams(userIdParamsSchema),
   validateBody(updateUserBodySchema),
   asyncHandler(usersController.update),
@@ -67,22 +54,19 @@ usersRoutes.patch(
 
 usersRoutes.delete(
   '/:id',
-  authorizeMiddleware('gestor'),
   validateParams(userIdParamsSchema),
   asyncHandler(usersController.remove),
 );
 
 usersRoutes.put(
   '/:id/departamentos',
-  authorizeMiddleware('gestor'),
   validateParams(userIdParamsSchema),
   validateBody(setDepartamentosBodySchema),
   asyncHandler(usersController.setDepartamentos),
 );
 
 usersRoutes.get(
-  '/funcionarios',
-  authorizeMiddleware('gestor'),
+  '/funcionario',
   validateQuery(getManyFuncionariosQuerySchema),
   asyncHandler(usersController.getManyFuncionarios),
 )
