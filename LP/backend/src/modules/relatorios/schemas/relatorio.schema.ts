@@ -1,17 +1,6 @@
 // modules/relatorios/schemas/relatorio.schema.ts
 import { z } from 'zod';
-
-const DIAS_MAXIMOS = 366;
-const UM_DIA_MS = 24 * 60 * 60 * 1000;
-
-const dataSchema = z
-  .string()
-  .regex(/^\d{4}-\d{2}-\d{2}$/, 'Use o formato AAAA-MM-DD')
-  .refine((valor) => {
-    const data = new Date(valor);
-    // Rejeita datas inexistentes, como 2026-02-31, que o JS "corrigiria" para março
-    return !isNaN(data.getTime()) && data.toISOString().startsWith(valor);
-  }, 'Data inválida');
+import { dataSchema, diasEntre, DIAS_MAXIMOS } from '../../../shared/schemas/data.schema.js';
 
 export const periodoQuerySchema = z
   .object({
@@ -24,6 +13,6 @@ export const periodoQuerySchema = z
     path: ['fim'],
   })
   .refine(
-    (query) => (new Date(query.fim).getTime() - new Date(query.inicio).getTime()) / UM_DIA_MS <= DIAS_MAXIMOS,
+    (query) => (diasEntre(query.inicio, query.fim) <= DIAS_MAXIMOS),
     { message: `O período não pode passar de ${DIAS_MAXIMOS} dias`, path: ['fim'] },
   );

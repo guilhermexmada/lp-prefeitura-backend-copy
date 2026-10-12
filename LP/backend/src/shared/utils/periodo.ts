@@ -15,6 +15,23 @@ function meiaNoiteEmBrasilia(data: string): Date {
   return new Date(`${data}T00:00:00${OFFSET_BRASILIA}`);
 }
 
+function hojeEmBrasilia(): string {
+  // 'en-CA' formata como AAAA-MM-DD
+  return new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Sao_Paulo' }).format(new Date());
+}
+
+function somarDias(data: string, dias: number): string {
+  const d = new Date(`${data}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + dias);
+  return d.toISOString().slice(0, 10);
+}
+
+// fim exclusivo = amanhã, para incluir o dia de hoje
+export function periodoUltimosDias(dias: number): { inicio: string; fim: string } {
+  const fim = somarDias(hojeEmBrasilia(), 1);
+  return { inicio: somarDias(fim, -dias), fim };
+}
+
 export function montarPeriodo(inicio: string, fim: string): PeriodoComAnterior {
   const inicioUtc = meiaNoiteEmBrasilia(inicio);
   const fimUtc = meiaNoiteEmBrasilia(fim);

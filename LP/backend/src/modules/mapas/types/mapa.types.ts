@@ -1,0 +1,45 @@
+import type { TicketStatus, TicketPrioridade } from '@prisma/client';
+
+export interface ConsultaMapaTicket {
+  id: number;
+  status: TicketStatus;
+  prioridade: TicketPrioridade;
+  descricao: string | null;
+  created_at: Date;
+  categoria: string;
+  departamento_id: number;
+  departamento: string;
+  lat: number;
+  lng: number;
+  distancia_metros: number | null;
+}
+
+export interface MarcadorTicket {
+  id: number;
+  status: TicketStatus;
+  prioridade: TicketPrioridade;
+  descricao: string | null;
+  criadoEm: Date;
+  categoria: string;
+  departamento: { id: number; nome: string };
+  lat: number;
+  lng: number;
+  distanciaMetros: number | null;
+}
+
+export type OrigemCentro = 'usuario' | 'tickets' | 'padrao';
+
+export interface LimitesMapa {
+  sul: number;
+  oeste: number;
+  norte: number;
+  leste: number;
+}
+
+export interface MapaTicketsResposta {
+  centro: { lat: number; lng: number; origem: OrigemCentro };
+  limites: LimitesMapa | null;
+  total: number;
+  truncado: boolean; // true se havia mais tickets que o limite
+  tickets: MarcadorTicket[];
+}
