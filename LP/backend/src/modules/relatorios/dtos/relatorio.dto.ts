@@ -1,4 +1,4 @@
-import z from 'zod';
-import { periodoQuerySchema } from "../schemas/relatorio.schema.js";
+import type { z } from 'zod';
+import type { relatorioQuerySchema } from '../schemas/relatorio.schema.js';
 
-export type PeriodoQueryDTO = z.infer<typeof periodoQuerySchema>;
+export type RelatorioQueryDTO = z.infer<typeof relatorioQuerySchema>;

@@ -1,17 +1,15 @@
-import type { NextFunction, Request, Response } from 'express';
-import { mapService } from './mapa.service.js';
-import type { MapaTicketsQueryDTO } from './dto/mapa.dto.js';
+import type { Request, Response } from 'express';
+import type { MapaTicketsQueryDTO } from './dtos/mapa.dto.js';
+import { mapaService } from './mapa.service.js';
 
-class MapController {
-    getMapaTickets = async (request: Request, response: Response, next: NextFunction) => {
-        try {
-            const query = request.validated?.query as MapaTicketsQueryDTO;
-            const resultado = await mapService.getMapaTickets(query, request.user!);
-            return response.status(200).json(resultado);
-        } catch (error) {
-            next(error);
-        }
-    };
+class MapaController {
+  getTickets = async (request: Request, response: Response) => {
+    const query = request.validated?.query as MapaTicketsQueryDTO;
+
+    const result = await mapaService.getTickets(request.user!, query);
+
+    response.status(200).json(result);
+  };
 }
 
-export const mapController = new MapController();
+export const mapaController = new MapaController();

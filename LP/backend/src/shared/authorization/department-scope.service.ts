@@ -5,11 +5,11 @@ import type { TokenPayload } from '../types/token-payload.js';
 /**
  * Responsável por responder "quais departamentos/tickets esse usuário pode acessar?".
  *
- * Hoje só existe o tipo `funcionario`, então o escopo é sempre a lista de
- * departamentos vinculados em `UsuarioDepartamento`. Quando o tipo `admin`
- * for introduzido no banco (fora do escopo desta Issue), esta função poderá
- * retornar `"all"` para ele, e nenhum service de ticket/solicitação precisará
- * ser alterado, pois todos consultam o escopo por aqui.
+ * Funcionários e gestores enxergam os departamentos vinculados em
+ * `UsuarioDepartamento` (no seed, a gestora está vinculada a todos os
+ * departamentos da secretaria). Se algum tipo precisar ver tudo, basta
+ * retornar `'all'` em getAccessibleDepartamentoIds: os services de tickets,
+ * solicitações, relatórios e mapa já tratam esse caso.
  */
 export type DepartmentScope = number[] | 'all';
 

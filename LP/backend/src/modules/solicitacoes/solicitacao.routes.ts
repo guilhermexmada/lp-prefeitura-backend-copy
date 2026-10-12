@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '../../shared/middlewares/authenticate.middleware.js';
-import { requireFuncionario } from '../../shared/middlewares/authorization.middleware.js';
+import { authorizeMiddleware } from '../../shared/middlewares/authorize.middleware.js';
 import {
   validateBody,
   validateParams,
@@ -14,7 +14,7 @@ import {
 
 const solicitacaoRoutes = Router();
 
-solicitacaoRoutes.use(authMiddleware, requireFuncionario);
+solicitacaoRoutes.use(authMiddleware, authorizeMiddleware('funcionario', 'gestor'));
 
 solicitacaoRoutes.patch(
   '/:id',

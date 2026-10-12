@@ -1,18 +1,11 @@
-// modules/relatorios/schemas/relatorio.schema.ts
 import { z } from 'zod';
-import { dataSchema, diasEntre, DIAS_MAXIMOS } from '../../../shared/schemas/data.schema.js';
+import { dataSchema, validarPeriodo } from '../../../shared/schemas/periodo.schema.js';
+import { idOpcionalSchema } from '../../../shared/schemas/query.schema.js';
 
-export const periodoQuerySchema = z
+export const relatorioQuerySchema = z
   .object({
     inicio: dataSchema,
     fim: dataSchema, // exclusivo: para agosto inteiro, fim = 2026-09-01
-    departamentoId: z.coerce.number().int().positive().optional(),
+    idDepartamento: idOpcionalSchema,
   })
-  .refine((query) => query.inicio < query.fim, {
-    message: 'A data final deve ser posterior à data inicial',
-    path: ['fim'],
-  })
-  .refine(
-    (query) => (diasEntre(query.inicio, query.fim) <= DIAS_MAXIMOS),
-    { message: `O período não pode passar de ${DIAS_MAXIMOS} dias`, path: ['fim'] },
-  );
+  .superRefine(validarPeriodo);
