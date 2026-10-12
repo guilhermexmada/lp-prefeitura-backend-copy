@@ -9,6 +9,9 @@ import { relatorioController } from './relatorio.controller.js';
 const relatorioRoutes = Router();
 relatorioRoutes.use(authMiddleware, authorizeMiddleware('gestor'));
 
-relatorioRoutes.get('/', validateQuery(periodoQuerySchema), asyncHandler(relatorioController.getAllRelatorios));
+relatorioRoutes.get('/indicadores', validateQuery(periodoQuerySchema), asyncHandler(relatorioController.getIndicadores));
+relatorioRoutes.get('/volume', validateQuery(periodoQuerySchema), asyncHandler(relatorioController.getVolumeSemanal));
+relatorioRoutes.get('/categorias', validateQuery(periodoQuerySchema), asyncHandler(relatorioController.getTicketsPorCategoria));
+relatorioRoutes.get('/departamentos', validateQuery(periodoQuerySchema), asyncHandler(relatorioController.getDesempenhoPorDepartamento));
 
 export { relatorioRoutes };

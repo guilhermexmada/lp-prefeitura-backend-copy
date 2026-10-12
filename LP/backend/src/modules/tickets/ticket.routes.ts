@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { authMiddleware } from '../../shared/middlewares/authenticate.middleware.js';
-import { requireFuncionario } from '../../shared/middlewares/authorization.middleware.js';
 import {
   validateBody,
   validateParams,

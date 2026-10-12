@@ -1,40 +1,28 @@
-import { AppError } from '../errors/app-error.js'; // ajuste o caminho
-
-const DIA_MS = 86_400_000;
-const PERIODO_PADRAO_DIAS = 30;
-const PERIODO_MAXIMO_DIAS = 366;
-
 export interface Periodo {
-  inicio: Date;
-  fim: Date;
+  inicio: Date; // inclusivo, instante em UTC
+  fim: Date;    // exclusivo, instante em UTC
 }
 
-export interface PeriodoComparativo extends Periodo {
+export interface PeriodoComAnterior extends Periodo {
   anterior: Periodo;
 }
 
-export function validarPeriodo(inicio?: Date, fim?: Date): PeriodoComparativo {
-  const hoje = new Date()
+// O Brasil não tem horário de verão desde 2019, então o deslocamento é fixo
+const OFFSET_BRASILIA = '-03:00';
 
-  const fimEfetivo = fim ? fim : hoje;
-  const inicioEfetivo = inicio ? inicio : new Date(fimEfetivo.getTime() - PERIODO_PADRAO_DIAS);
+// '2026-08-01' -> meia-noite em Brasília -> 2026-08-01T03:00:00.000Z
+function meiaNoiteEmBrasilia(data: string): Date {
+  return new Date(`${data}T00:00:00${OFFSET_BRASILIA}`);
+}
 
-  if (inicioEfetivo >= fimEfetivo) {
-    throw new AppError('A data inicial deve ser anterior ou igual à data final', 400);
-  }
-
-  const duracao = fimEfetivo.getTime() - inicioEfetivo.getTime();
-
-  if (duracao > PERIODO_MAXIMO_DIAS * DIA_MS) {
-    throw new AppError(`O período não pode passar de ${PERIODO_MAXIMO_DIAS} dias`, 400);
-  }
+export function montarPeriodo(inicio: string, fim: string): PeriodoComAnterior {
+  const inicioUtc = meiaNoiteEmBrasilia(inicio);
+  const fimUtc = meiaNoiteEmBrasilia(fim);
+  const duracaoMs = fimUtc.getTime() - inicioUtc.getTime();
 
   return {
-    inicio: inicioEfetivo,
-    fim: fimEfetivo,
-    anterior: {
-      inicio: new Date(inicioEfetivo.getTime() - duracao),
-      fim: inicioEfetivo,
-    },
+    inicio: inicioUtc,
+    fim: fimUtc,
+    anterior: { inicio: new Date(inicioUtc.getTime() - duracaoMs), fim: inicioUtc },
   };
 }
